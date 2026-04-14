@@ -1,0 +1,37 @@
+{
+  "_id": "default_board",
+  "title": "Project Roadmap",
+  "columns": [
+    {
+      "_id": "lcikp774d",
+      "title": "To Do",
+      "color": "indigo-500",
+      "cards": []
+    },
+    {
+      "_id": "d4edfhzoh",
+      "title": "In Progress",
+      "color": "cyan-500",
+      "cards": []
+    },
+    {
+      "_id": "g3989cy16",
+      "title": "Review",
+      "color": "amber-500",
+      "cards": []
+    },
+    {
+      "_id": "lpsjidjn3",
+      "title": "Done",
+      "color": "emerald-500",
+      "cards": [
+        {
+          "_id": "sslaqpxtv",
+          "createdAt": "2026-04-14T07:38:52.579Z",
+          "title": "do math",
+          "priority": "medium"
+        }
+      ]
+    }
+  ]
+}
