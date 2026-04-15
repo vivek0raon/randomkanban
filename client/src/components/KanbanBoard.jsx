@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { DndContext, closestCorners, KeyboardSensor, PointerSensor, useSensor, useSensors, DragOverlay } from '@dnd-kit/core';
+import { DndContext, closestCorners, KeyboardSensor, PointerSensor, TouchSensor, useSensor, useSensors, DragOverlay } from '@dnd-kit/core';
 import { SortableContext, arrayMove, sortableKeyboardCoordinates, horizontalListSortingStrategy } from '@dnd-kit/sortable';
 import KanbanColumn from './KanbanColumn';
 import { Loader2 } from 'lucide-react';
@@ -23,6 +23,7 @@ export default function KanbanBoard({ boardId, loadAllBoards, boards }) {
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 200, tolerance: 5 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   );
 

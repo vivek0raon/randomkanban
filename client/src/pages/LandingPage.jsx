@@ -5,20 +5,22 @@ import { LayoutDashboard, ArrowRight, Zap, Target, Lock } from 'lucide-react';
 export default function LandingPage() {
   return (
     <div className="landing-page" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-      <header className="app-header" style={{ position: 'relative', background: 'transparent', border: 'none' }}>
+      <header className="app-header" style={{ position: 'relative', background: 'transparent', border: 'none', flexWrap: 'wrap', gap: '0.75rem' }}>
         <div className="app-title" style={{ fontSize: '1.75rem' }}>
           <LayoutDashboard className="app-title-icon" size={32} />
           <span>NovaKanban</span>
         </div>
         <div style={{ display: 'flex', gap: '1rem' }}>
-          <Link to="/auth" className="button-primary" style={{ textDecoration: 'none' }}>
-            Login / Get Started <ArrowRight size={18} />
+          <Link to="/auth" className="button-primary" style={{ textDecoration: 'none', whiteSpace: 'nowrap', fontSize: 'clamp(0.75rem, 2vw, 0.95rem)' }}>
+            <span className="hide-mobile">Login / Get Started</span>
+            <span className="show-mobile">Get Started</span>
+            <ArrowRight size={16} />
           </Link>
         </div>
       </header>
       
-      <main style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '4rem 2rem' }}>
-        <h1 style={{ fontSize: '4rem', fontWeight: 800, marginBottom: '1.5rem', background: 'linear-gradient(to right, #f8f8f2, #a2aab8)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+      <main style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: 'clamp(2rem, 5vw, 4rem) 1.25rem' }}>
+        <h1 style={{ fontSize: 'clamp(2rem, 6vw, 4rem)', fontWeight: 800, marginBottom: '1.5rem', background: 'linear-gradient(to right, #f8f8f2, #a2aab8)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
           Manage Chaos, <br/>
           <span style={{ background: 'linear-gradient(135deg, var(--accent-indigo), var(--accent-cyan))', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Beautifully.</span>
         </h1>
