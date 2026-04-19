@@ -47,6 +47,11 @@ export const updateBoard = async (boardId, boardData) => {
   return response.data;
 };
 
+export const deleteBoard = async (boardId) => {
+  const response = await api.delete(`/boards/${boardId}`);
+  return response.data;
+};
+
 // --- Column APIs ---
 export const addColumn = async (boardId, columnData) => {
   const response = await api.post(`/boards/${boardId}/columns`, columnData);

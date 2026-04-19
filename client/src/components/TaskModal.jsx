@@ -1,8 +1,43 @@
 import React, { useState } from 'react';
 import ReactDOM from 'react-dom';
 import { X, Calendar as CalendarIcon } from 'lucide-react';
-import DatePicker from 'react-datepicker';
-import "react-datepicker/dist/react-datepicker.css";
+
+import dayjs from 'dayjs';
+import { ThemeProvider, createTheme } from '@mui/material/styles';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { MobileDateTimePicker } from '@mui/x-date-pickers/MobileDateTimePicker';
+import { renderTimeViewClock } from '@mui/x-date-pickers/timeViewRenderers';
+
+const darkTheme = createTheme({
+  palette: {
+    mode: 'dark',
+    background: {
+      paper: 'rgba(30, 33, 48, 0.98)', 
+    },
+    primary: {
+      main: '#818cf8', 
+    }
+  },
+  typography: {
+    fontFamily: 'inherit'
+  },
+  components: {
+    MuiDialog: {
+      styleOverrides: {
+        root: {
+          zIndex: '10001 !important',
+        },
+        paper: {
+          backdropFilter: 'blur(10px)',
+          border: '1px solid rgba(255,255,255,0.1)',
+          borderRadius: '16px',
+          backgroundImage: 'none'
+        }
+      }
+    }
+  }
+});
 
 export default function TaskModal({ isOpen, onClose, onSave, columnTitle, existingCard = null }) {
   const [title, setTitle] = useState(existingCard?.title || '');
@@ -42,10 +77,10 @@ export default function TaskModal({ isOpen, onClose, onSave, columnTitle, existi
           <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.85rem', color: 'var(--text-muted)' }}>Description</label>
           <textarea value={description} onChange={e => setDescription(e.target.value)} style={{ ...inputStyle, minHeight: '100px', resize: 'vertical' }} placeholder="Add more details..." />
           
-          <div className="modal-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+          <div className="modal-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1.25rem' }}>
             <div>
               <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.85rem', color: 'var(--text-muted)' }}>Priority</label>
-              <select value={priority} onChange={e => setPriority(e.target.value)} style={{...inputStyle, width: '100%', appearance: 'auto', backgroundColor: 'rgba(25, 28, 41, 0.9)'}}>
+              <select value={priority} onChange={e => setPriority(e.target.value)} style={{...inputStyle, marginBottom: 0, height: '48px', boxSizing: 'border-box', width: '100%', appearance: 'auto', backgroundColor: 'rgba(25, 28, 41, 0.9)'}}>
                 <option value="low">Low</option>
                 <option value="medium">Medium</option>
                 <option value="high">High</option>
@@ -53,21 +88,52 @@ export default function TaskModal({ isOpen, onClose, onSave, columnTitle, existi
               </select>
             </div>
             
-            <div>
+            <div style={{ width: '100%', overflow: 'hidden' }}>
               <label style={{ display: 'flex', marginBottom: '0.5rem', fontSize: '0.85rem', color: 'var(--text-muted)', alignItems: 'center', gap: '0.25rem' }}><CalendarIcon size={14}/> Due Date & Time</label>
-              <DatePicker 
-                selected={dueDate} 
-                onChange={(date) => setDueDate(date)} 
-                showTimeSelect
-                timeFormat="HH:mm"
-                timeIntervals={15}
-                timeCaption="Time"
-                dateFormat="MMMM d, yyyy h:mm aa"
-                placeholderText="Select deadline..."
-                className="custom-date-picker"
-                wrapperClassName="date-picker-wrapper"
-                withPortal
-              />
+              <ThemeProvider theme={darkTheme}>
+                <LocalizationProvider dateAdapter={AdapterDayjs}>
+                  <MobileDateTimePicker
+                    value={dueDate ? dayjs(dueDate) : null}
+                    onChange={(newValue) => setDueDate(newValue ? newValue.toDate() : null)}
+                    viewRenderers={{
+                      hours: renderTimeViewClock,
+                      minutes: renderTimeViewClock,
+                      seconds: renderTimeViewClock,
+                    }}
+                    slotProps={{
+                      textField: { 
+                        placeholder: "Select deadline...",
+                        sx: {
+                          width: '100%',
+                          '& .MuiInputBase-root': {
+                            backgroundColor: 'rgba(0,0,0,0.3)',
+                            border: '1px solid var(--panel-border)',
+                            color: 'white',
+                            borderRadius: '8px',
+                            fontFamily: 'inherit',
+                            fontSize: '0.9rem',
+                            height: '48px',
+                            boxSizing: 'border-box',
+                            padding: 0
+                          },
+                          '& .MuiInputBase-input': {
+                            padding: '0 0.75rem',
+                            height: '100%',
+                            boxSizing: 'border-box'
+                          },
+                          '& .MuiOutlinedInput-notchedOutline': {
+                            border: 'none'
+                          },
+                          '& .MuiSvgIcon-root': {
+                            color: 'white',
+                            marginRight: '0.5rem'
+                          }
+                        }
+                      }
+                    }}
+                  />
+                </LocalizationProvider>
+              </ThemeProvider>
             </div>
           </div>
           
@@ -79,93 +145,10 @@ export default function TaskModal({ isOpen, onClose, onSave, columnTitle, existi
       </div>
 
       <style>{`
-        .date-picker-wrapper { width: 100%; }
-        .custom-date-picker {
-          width: 100%; padding: 0.75rem; background: rgba(0,0,0,0.3); border: 1px solid var(--panel-border);
-          color: white; border-radius: 8px; outline: none; font-family: inherit;
-        }
-        .react-datepicker {
-          background-color: var(--card-bg) !important;
-          border: 1px solid var(--panel-border) !important;
-          color: white !important;
-          font-family: inherit !important;
-          box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5) !important;
-          backdrop-filter: blur(12px) !important;
-        }
-        .react-datepicker__header {
-          background-color: rgba(255,255,255,0.05) !important;
-          border-bottom: 1px solid var(--panel-border) !important;
-        }
-        .react-datepicker__current-month, .react-datepicker-time__header, .react-datepicker-year-header {
-          color: white !important;
-        }
-        .react-datepicker__day-name, .react-datepicker__day, .react-datepicker__time-name {
-          color: var(--text-muted) !important;
-        }
-        .react-datepicker__day:hover, .react-datepicker__month-text:hover, .react-datepicker__quarter-text:hover, .react-datepicker__year-text:hover {
-          background-color: var(--card-hover) !important;
-          color: white !important;
-        }
-        .react-datepicker__day--selected, .react-datepicker__day--in-selecting-range, .react-datepicker__day--in-range, .react-datepicker__month-text--selected, .react-datepicker__quarter-text--selected, .react-datepicker__year-text--selected {
-          background: linear-gradient(135deg, var(--accent-indigo), var(--accent-cyan)) !important;
-          color: white !important;
-        }
-        .react-datepicker__time-container {
-          border-left: 1px solid var(--panel-border) !important;
-        }
-        .react-datepicker__time-container .react-datepicker__time {
-          background-color: transparent !important;
-        }
-        .react-datepicker__time-container .react-datepicker__time .react-datepicker__time-box ul.react-datepicker__time-list li.react-datepicker__time-list-item {
-          color: var(--text-muted) !important;
-        }
-        .react-datepicker__time-container .react-datepicker__time .react-datepicker__time-box ul.react-datepicker__time-list li.react-datepicker__time-list-item:hover {
-          background-color: var(--card-hover) !important;
-          color: white !important;
-        }
-        .react-datepicker__time-container .react-datepicker__time .react-datepicker__time-box ul.react-datepicker__time-list li.react-datepicker__time-list-item--selected {
-          background-color: var(--accent-indigo) !important;
-          color: white !important;
-        }
-
-        /* withPortal overlay styling */
-        .react-datepicker__portal {
-          background: rgba(0, 0, 0, 0.7) !important;
-          z-index: 10001 !important;
-        }
-        .react-datepicker__portal .react-datepicker {
-          display: flex !important;
-          flex-direction: row !important;
-        }
-
         /* Mobile: stack time below calendar */
         @media (max-width: 768px) {
           .modal-grid {
             grid-template-columns: 1fr !important;
-          }
-          .react-datepicker__portal .react-datepicker {
-            flex-direction: column !important;
-          }
-          .react-datepicker__time-container {
-            border-left: none !important;
-            border-top: 1px solid var(--panel-border) !important;
-            width: 100% !important;
-          }
-          .react-datepicker__time-container .react-datepicker__time .react-datepicker__time-box {
-            width: 100% !important;
-          }
-          .react-datepicker__time-container .react-datepicker__time .react-datepicker__time-box ul.react-datepicker__time-list {
-            display: flex !important;
-            flex-wrap: wrap !important;
-            max-height: 120px !important;
-            overflow-y: auto !important;
-          }
-          .react-datepicker__time-container .react-datepicker__time .react-datepicker__time-box ul.react-datepicker__time-list li.react-datepicker__time-list-item {
-            flex: 0 0 auto !important;
-            padding: 5px 10px !important;
-          }
-          .react-datepicker__navigation {
-            top: 8px !important;
           }
         }
       `}</style>

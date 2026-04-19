@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
-import { fetchBoards, createBoard } from '../api/kanban';
+import { fetchBoards, createBoard, deleteBoard } from '../api/kanban';
 import KanbanBoard from '../components/KanbanBoard';
-import { Plus, LogOut, Layout, Folder, Send } from 'lucide-react';
+import BoardSelectorModal from '../components/BoardSelectorModal';
+import CreateBoardModal from '../components/CreateBoardModal';
+import { Plus, LogOut, Layout, Folder, Send, Trash2, ChevronDown } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import NotificationToast from '../components/NotificationToast';
 
@@ -11,8 +13,7 @@ export default function Dashboard() {
   const [boards, setBoards] = useState([]);
   const [activeBoardId, setActiveBoardId] = useState(null);
   const [isCreatingBoard, setIsCreatingBoard] = useState(false);
-  const [newBoardName, setNewBoardName] = useState('');
-  const [newBoardCategory, setNewBoardCategory] = useState('Personal');
+  const [isBoardModalOpen, setIsBoardModalOpen] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -31,15 +32,12 @@ export default function Dashboard() {
     }
   };
 
-  const handleCreateBoard = async (e) => {
-    e.preventDefault();
-    if (!newBoardName.trim()) return;
+  const handleCreateBoard = async (title, category) => {
     try {
-      const newBoard = await createBoard({ title: newBoardName, category: newBoardCategory });
+      const newBoard = await createBoard({ title, category });
       setBoards([...boards, newBoard]);
       setActiveBoardId(newBoard._id);
       setIsCreatingBoard(false);
-      setNewBoardName('');
     } catch (err) {
       console.error(err);
     }
@@ -50,11 +48,48 @@ export default function Dashboard() {
     navigate('/');
   };
 
+  const handleDeleteBoard = async (boardId, e) => {
+    e.stopPropagation();
+    if (window.confirm('Are you sure you want to delete this board?')) {
+      try {
+        await deleteBoard(boardId);
+        const newBoards = boards.filter(b => b._id !== boardId);
+        setBoards(newBoards);
+        if (activeBoardId === boardId) {
+          setActiveBoardId(newBoards.length > 0 ? newBoards[0]._id : null);
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+  };
+
+  const handleDeleteWorkspace = async (category, e) => {
+    e.stopPropagation();
+    if (window.confirm(`Are you sure you want to delete the workspace "${category}" and all its boards?`)) {
+      try {
+        const boardsInCat = boards.filter(b => b.category === category);
+        for (const board of boardsInCat) {
+          await deleteBoard(board._id);
+        }
+        const newBoards = boards.filter(b => b.category !== category);
+        setBoards(newBoards);
+        if (boardsInCat.some(b => b._id === activeBoardId)) {
+          setActiveBoardId(newBoards.length > 0 ? newBoards[0]._id : null);
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+  };
+
   const groupedBoards = boards.reduce((acc, board) => {
     acc[board.category] = acc[board.category] || [];
     acc[board.category].push(board);
     return acc;
   }, {});
+
+  const activeBoard = boards.find(b => b._id === activeBoardId);
 
   return (
     <div className="dashboard-wrapper" style={{ display: 'flex', height: '100vh', overflow: 'hidden' }}>
@@ -71,58 +106,31 @@ export default function Dashboard() {
           <span style={{ fontWeight: 600 }}>{user?.username}</span>
         </div>
 
-        <div className="sidebar-content" style={{ padding: '1.5rem', flex: 1, overflowY: 'auto' }}>
+        <div className="sidebar-content" style={{ padding: '1.5rem', paddingBottom: '2.5rem', flex: 1, minHeight: 0, overflowY: 'auto' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', color: 'var(--text-muted)', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '1px' }}>
-            <span>Your Workspaces</span>
-            <button onClick={() => setIsCreatingBoard(!isCreatingBoard)} style={{ background: 'none', border: 'none', color: 'var(--text-main)', cursor: 'pointer' }}><Plus size={16} /></button>
+            <span>Current Board</span>
           </div>
 
-          {isCreatingBoard && (
-            <form onSubmit={handleCreateBoard} style={{ marginBottom: '1.5rem' }}>
-              <input 
-                type="text" 
-                placeholder="Board name..." 
-                value={newBoardName} 
-                onChange={e => setNewBoardName(e.target.value)}
-                style={{ width: '100%', background: 'rgba(0,0,0,0.2)', border: '1px solid var(--panel-border)', color: 'white', padding: '0.5rem', borderRadius: '4px', outline: 'none', marginBottom: '0.5rem', fontSize: '0.85rem' }} 
-                autoFocus
-              />
-              <select 
-                value={newBoardCategory} 
-                onChange={e => setNewBoardCategory(e.target.value)}
-                style={{ width: '100%', background: 'rgba(0,0,0,0.2)', border: '1px solid var(--panel-border)', color: 'white', padding: '0.5rem', borderRadius: '4px', outline: 'none', marginBottom: '0.5rem', fontSize: '0.85rem' }} 
-              >
-                <option value="Personal">Personal</option>
-                <option value="Work">Work</option>
-                <option value="Archived">Archived</option>
-              </select>
-              <button type="submit" className="button-primary" style={{ padding: '0.3rem', width: '100%', justifyContent: 'center', fontSize: '0.85rem' }}>Create</button>
-            </form>
-          )}
+          <button 
+             onClick={() => setIsBoardModalOpen(true)}
+             style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.75rem', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--panel-border)', borderRadius: '8px', color: 'white', cursor: 'pointer', marginBottom: '2.5rem', transition: 'background 0.2s' }}
+             onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.1)'}
+             onMouseLeave={e => e.currentTarget.style.background = 'rgba(255,255,255,0.05)'}
+          >
+             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', overflow: 'hidden' }}>
+               <Layout size={16} style={{ flexShrink: 0, color: 'var(--accent-cyan)' }} />
+               <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', fontWeight: 600 }}>
+                 {activeBoard ? activeBoard.title : 'Select Board...'}
+               </span>
+             </div>
+             <ChevronDown size={16} style={{ color: 'var(--text-muted)' }} />
+          </button>
 
-          {Object.entries(groupedBoards).map(([category, catBoards]) => (
-            <div className="category-block" key={category} style={{ marginBottom: '1.5rem' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-muted)', fontSize: '0.85rem', marginBottom: '0.5rem' }}>
-                <Folder size={14} /> {category}
-              </div>
-              <ul style={{ listStyle: 'none' }}>
-                {catBoards.map(board => (
-                  <li key={board._id} style={{ marginBottom: '0.2rem' }}>
-                    <button 
-                      onClick={() => setActiveBoardId(board._id)}
-                      style={{
-                        width: '100%', textAlign: 'left', background: activeBoardId === board._id ? 'rgba(255,255,255,0.1)' : 'transparent',
-                        border: 'none', color: activeBoardId === board._id ? 'white' : 'var(--text-muted)',
-                        padding: '0.5rem 0.75rem', borderRadius: '6px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem', transition: 'all 0.2s'
-                      }}
-                    >
-                      <Layout size={14} /> {board.title}
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', color: 'var(--text-muted)', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '1px' }}>
+            <span>New Board</span>
+            <button onClick={() => setIsCreatingBoard(true)} style={{ background: 'none', border: 'none', color: 'var(--text-main)', cursor: 'pointer' }} title="Create new board"><Plus size={16} /></button>
+          </div>
+
         </div>
 
         <div className="sidebar-logout" style={{ padding: '1rem', borderTop: '1px solid var(--panel-border)', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
@@ -155,6 +163,23 @@ export default function Dashboard() {
       </main>
 
       <NotificationToast boards={boards} />
+
+      <BoardSelectorModal 
+        isOpen={isBoardModalOpen}
+        onClose={() => setIsBoardModalOpen(false)}
+        boards={boards}
+        activeBoardId={activeBoardId}
+        onSelectBoard={setActiveBoardId}
+        onDeleteBoard={(id, e) => { e.stopPropagation(); handleDeleteBoard(id, e); }}
+        onDeleteWorkspace={(cat, e) => { e.stopPropagation(); handleDeleteWorkspace(cat, e); }}
+      />
+      
+      <CreateBoardModal 
+        isOpen={isCreatingBoard}
+        onClose={() => setIsCreatingBoard(false)}
+        onCreate={handleCreateBoard}
+        groupedBoards={groupedBoards}
+      />
     </div>
   );
 }
