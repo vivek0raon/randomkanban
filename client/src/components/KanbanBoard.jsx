@@ -4,6 +4,7 @@ import { SortableContext, arrayMove, sortableKeyboardCoordinates, horizontalList
 import KanbanColumn from './KanbanColumn';
 import { Loader2 } from 'lucide-react';
 import { updateBoard } from '../api/kanban';
+import WidgetsSidebar from './WidgetsSidebar';
 
 export default function KanbanBoard({ boardId, loadAllBoards, boards }) {
   const [board, setBoard] = useState(null);
@@ -58,6 +59,14 @@ export default function KanbanBoard({ boardId, loadAllBoards, boards }) {
         if (activeColIndex !== overColIndex) {
           const activeCardObj = newBoard.columns[activeColIndex].cards.find(c => c._id === activeId);
           newBoard.columns[activeColIndex].cards = newBoard.columns[activeColIndex].cards.filter(c => c._id !== activeId);
+          
+          // Update color based on the new column
+          const newColTitle = newBoard.columns[overColIndex].title.toLowerCase();
+          if (newColTitle.includes('todo') || newColTitle.includes('to do')) activeCardObj.color = '#ef4444';
+          else if (newColTitle.includes('progress') || newColTitle.includes('doing')) activeCardObj.color = '#eab308';
+          else if (newColTitle.includes('done')) activeCardObj.color = '#22c55e';
+          else activeCardObj.color = '#818cf8';
+
           const overCardIndex = newBoard.columns[overColIndex].cards.findIndex(c => c._id === overId);
           newBoard.columns[overColIndex].cards.splice(overCardIndex, 0, activeCardObj);
         } else {
@@ -72,6 +81,14 @@ export default function KanbanBoard({ boardId, loadAllBoards, boards }) {
         if (activeColIndex !== overColIndex) {
           const activeCardObj = newBoard.columns[activeColIndex].cards.find(c => c._id === activeId);
           newBoard.columns[activeColIndex].cards = newBoard.columns[activeColIndex].cards.filter(c => c._id !== activeId);
+          
+          // Update color based on the new column
+          const newColTitle = newBoard.columns[overColIndex].title.toLowerCase();
+          if (newColTitle.includes('todo') || newColTitle.includes('to do')) activeCardObj.color = '#ef4444';
+          else if (newColTitle.includes('progress') || newColTitle.includes('doing')) activeCardObj.color = '#eab308';
+          else if (newColTitle.includes('done')) activeCardObj.color = '#22c55e';
+          else activeCardObj.color = '#818cf8';
+
           newBoard.columns[overColIndex].cards.push(activeCardObj);
         }
       }
@@ -108,10 +125,11 @@ export default function KanbanBoard({ boardId, loadAllBoards, boards }) {
               <KanbanColumn key={col._id} column={col} boardId={board._id} reloadBoard={loadAllBoards} />
             ))}
           </SortableContext>
+          <WidgetsSidebar />
         </div>
         <DragOverlay>
           {activeCard && (
-            <div className="glass-card kanban-card" style={{ transform: 'rotate(5deg)' }}>
+            <div className="glass-card kanban-card" style={{ transform: 'rotate(5deg)', borderLeft: activeCard.color ? `4px solid ${activeCard.color}` : '1px solid var(--panel-border)' }}>
               <div className="card-title">{activeCard.title}</div>
             </div>
           )}

@@ -40,10 +40,19 @@ const darkTheme = createTheme({
 });
 
 export default function TaskModal({ isOpen, onClose, onSave, columnTitle, existingCard = null }) {
+  const getDefaultColor = () => {
+    if (existingCard?.color) return existingCard.color;
+    if (columnTitle?.toLowerCase().includes('todo') || columnTitle?.toLowerCase().includes('to do')) return '#ef4444'; // red-500
+    if (columnTitle?.toLowerCase().includes('progress') || columnTitle?.toLowerCase().includes('doing')) return '#eab308'; // yellow-500
+    if (columnTitle?.toLowerCase().includes('done')) return '#22c55e'; // green-500
+    return '#818cf8'; // indigo-400
+  };
+
   const [title, setTitle] = useState(existingCard?.title || '');
   const [description, setDescription] = useState(existingCard?.description || '');
   const [priority, setPriority] = useState(existingCard?.priority || 'medium');
   const [dueDate, setDueDate] = useState(existingCard?.dueDate ? new Date(existingCard.dueDate) : null);
+  const [color, setColor] = useState(getDefaultColor());
 
   if (!isOpen) return null;
 
@@ -53,6 +62,7 @@ export default function TaskModal({ isOpen, onClose, onSave, columnTitle, existi
       title,
       description,
       priority,
+      color,
       dueDate: dueDate ? dueDate.toISOString() : null
     });
     onClose();
@@ -64,8 +74,8 @@ export default function TaskModal({ isOpen, onClose, onSave, columnTitle, existi
   };
 
   const modalContent = (
-    <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999, padding: '1rem', overflowY: 'auto' }}>
-      <div className="glass-panel" style={{ width: '100%', maxWidth: '500px', borderRadius: '16px', padding: '2rem', position: 'relative', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)', border: '1px solid rgba(255,255,255,0.1)', maxHeight: '90vh', overflowY: 'auto' }}>
+    <div onClick={onClose} style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999, padding: '1rem', overflowY: 'auto' }}>
+      <div className="glass-panel" onClick={e => e.stopPropagation()} style={{ width: '100%', maxWidth: '500px', borderRadius: '16px', padding: '2rem', position: 'relative', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)', border: '1px solid rgba(255,255,255,0.1)', maxHeight: '90vh', overflowY: 'auto' }}>
         <button onClick={onClose} style={{ position: 'absolute', top: '1.5rem', right: '1.5rem', background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}><X size={20}/></button>
         
         <h2 style={{ marginBottom: '1.5rem', fontSize: '1.25rem' }}>{existingCard ? 'Edit Task' : `Add Task to ${columnTitle}`}</h2>
@@ -134,6 +144,24 @@ export default function TaskModal({ isOpen, onClose, onSave, columnTitle, existi
                   />
                 </LocalizationProvider>
               </ThemeProvider>
+            </div>
+          </div>
+          
+          <div style={{ marginBottom: '1.5rem' }}>
+            <label style={{ display: 'block', marginBottom: '0.75rem', fontSize: '0.85rem', color: 'var(--text-muted)' }}>Task Color</label>
+            <div style={{ display: 'flex', gap: '0.75rem' }}>
+              {['#ef4444', '#eab308', '#22c55e', '#3b82f6', '#8b5cf6', '#818cf8', '#64748b'].map(c => (
+                <div 
+                  key={c}
+                  onClick={() => setColor(c)}
+                  style={{ 
+                    width: '28px', height: '28px', borderRadius: '50%', backgroundColor: c, cursor: 'pointer',
+                    border: color === c ? '2px solid white' : '2px solid transparent',
+                    boxShadow: color === c ? `0 0 8px ${c}` : 'none',
+                    transition: 'all 0.2s'
+                  }}
+                />
+              ))}
             </div>
           </div>
           

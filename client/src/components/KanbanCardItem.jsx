@@ -59,7 +59,7 @@ export default function KanbanCardItem({ card, columnId, boardId, reloadBoard })
     <>
       <div 
         ref={setNodeRef} 
-        style={style} 
+        style={{ ...style, borderLeft: card.color ? `4px solid ${card.color}` : '1px solid var(--panel-border)' }} 
         className="glass-card kanban-card"
         {...attributes}
         {...listeners}

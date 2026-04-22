@@ -18,6 +18,10 @@ const cardSchema = new mongoose.Schema({
     type: Date,
     default: null,
   },
+  color: {
+    type: String,
+    default: '',
+  },
   tags: [String],
   createdAt: {
     type: Date,
