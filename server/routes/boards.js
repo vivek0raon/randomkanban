@@ -112,6 +112,23 @@ router.put('/:id/columns/:colId/cards/:cardId', async (req, res) => {
   }
 });
 
+// Clear all cards in a column
+router.delete('/:id/columns/:colId/cards', async (req, res) => {
+  try {
+    const board = await Board.findOne({ _id: req.params.id, user: req.user._id });
+    if (!board) return res.status(404).json({ message: 'Board not found' });
+
+    const column = board.columns.id(req.params.colId);
+    if (!column) return res.status(404).json({ message: 'Column not found' });
+
+    column.cards = [];
+    await board.save();
+    res.json(board);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+});
+
 // Delete a card
 router.delete('/:id/columns/:colId/cards/:cardId', async (req, res) => {
   try {

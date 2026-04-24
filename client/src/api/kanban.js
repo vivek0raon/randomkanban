@@ -58,6 +58,11 @@ export const addColumn = async (boardId, columnData) => {
   return response.data;
 };
 
+export const clearColumn = async (boardId, columnId) => {
+  const response = await api.delete(`/boards/${boardId}/columns/${columnId}/cards`);
+  return response.data;
+};
+
 // --- Card APIs ---
 export const addCard = async (boardId, columnId, cardData) => {
   const response = await api.post(`/boards/${boardId}/columns/${columnId}/cards`, cardData);

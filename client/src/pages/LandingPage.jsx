@@ -1,6 +1,8 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { LayoutDashboard, ArrowRight, Zap, Target, Lock } from 'lucide-react';
+import kanbanGraphic from '../assets/kanban_board_graphic.png';
+import telegramGraphic from '../assets/telegram_integration_graphic.png';
 
 export default function LandingPage() {
   return (
@@ -45,6 +47,34 @@ export default function LandingPage() {
             desc="Encrypted JWT authentication keeps your workflow private." 
           />
         </div>
+
+        <section style={{ marginTop: '6rem', maxWidth: '1000px', width: '100%', textAlign: 'left' }}>
+          <h2 style={{ fontSize: 'clamp(1.8rem, 4vw, 2.5rem)', textAlign: 'center', marginBottom: '4rem', color: 'var(--text-main)' }}>Experience the Next Level of Productivity</h2>
+          
+          <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '3rem', marginBottom: '6rem' }}>
+            <div style={{ flex: '1 1 400px' }}>
+              <h3 style={{ fontSize: '1.8rem', color: 'var(--accent-cyan)', marginBottom: '1rem' }}>Visually Stunning Workspace</h3>
+              <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem', lineHeight: '1.6' }}>
+                NovaKanban replaces the dull grids of typical project management tools with a vibrant, premium glassmorphism interface. With smooth drag-and-drop interactions, aesthetic neon accents, and a dark mode designed to reduce eye strain, organizing your tasks has never felt this good.
+              </p>
+            </div>
+            <div style={{ flex: '1 1 400px' }}>
+              <img src={kanbanGraphic} alt="Aesthetic Kanban Board" style={{ width: '100%', borderRadius: '16px', boxShadow: '0 10px 30px rgba(6, 182, 212, 0.2)', border: '1px solid var(--panel-border)' }} />
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '3rem', flexDirection: 'row-reverse' }}>
+            <div style={{ flex: '1 1 400px' }}>
+              <h3 style={{ fontSize: '1.8rem', color: 'var(--accent-indigo)', marginBottom: '1rem' }}>Instant Telegram Notifications</h3>
+              <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem', lineHeight: '1.6' }}>
+                Never miss a deadline again. Connect your account to our Telegram bot and receive instant updates when a task is due or expired. Our background scheduler keeps an eye on your boards so you can focus entirely on the work that matters.
+              </p>
+            </div>
+            <div style={{ flex: '1 1 400px' }}>
+              <img src={telegramGraphic} alt="Telegram Integration Notification" style={{ width: '100%', borderRadius: '16px', boxShadow: '0 10px 30px rgba(99, 102, 241, 0.2)', border: '1px solid var(--panel-border)' }} />
+            </div>
+          </div>
+        </section>
       </main>
       
       {/* Decorative floating elements */}

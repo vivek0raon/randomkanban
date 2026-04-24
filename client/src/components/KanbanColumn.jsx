@@ -2,8 +2,8 @@ import { useState } from 'react';
 import { SortableContext, verticalListSortingStrategy, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import KanbanCardItem from './KanbanCardItem';
-import { Plus } from 'lucide-react';
-import { addCard } from '../api/kanban';
+import { Plus, Eraser } from 'lucide-react';
+import { addCard, clearColumn } from '../api/kanban';
 import TaskModal from './TaskModal';
 
 export default function KanbanColumn({ column, boardId, reloadBoard }) {
@@ -31,6 +31,17 @@ export default function KanbanColumn({ column, boardId, reloadBoard }) {
     }
   };
 
+  const handleClearColumn = async () => {
+    if (window.confirm(`Are you sure you want to clear all tasks from "${column.title}"?`)) {
+      try {
+        await clearColumn(boardId, column._id);
+        reloadBoard();
+      } catch (err) {
+        console.error("Failed to clear column", err);
+      }
+    }
+  };
+
   return (
     <div ref={setNodeRef} style={style} className="glass-panel kanban-column">
       <div className="column-header" {...attributes} {...listeners}>
@@ -38,7 +49,18 @@ export default function KanbanColumn({ column, boardId, reloadBoard }) {
           <div className="column-color-indicator" style={{ background: `var(--accent-${column.color.split('-')[0]})` }} />
           {column.title}
         </div>
-        <div className="column-card-count">{column.cards.length}</div>
+        <div className="column-header-actions" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <div className="column-card-count">{column.cards.length}</div>
+          {column.cards.length > 0 && (
+            <button 
+              className="action-btn" 
+              onClick={(e) => { e.stopPropagation(); handleClearColumn(); }}
+              title="Clear Deck"
+            >
+              <Eraser size={14} />
+            </button>
+          )}
+        </div>
       </div>
 
       <div className="column-body">

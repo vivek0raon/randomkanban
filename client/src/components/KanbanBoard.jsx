@@ -2,12 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { DndContext, closestCorners, KeyboardSensor, PointerSensor, TouchSensor, useSensor, useSensors, DragOverlay } from '@dnd-kit/core';
 import { SortableContext, arrayMove, sortableKeyboardCoordinates, horizontalListSortingStrategy } from '@dnd-kit/sortable';
 import KanbanColumn from './KanbanColumn';
-import { Loader2 } from 'lucide-react';
+import { Loader2, LayoutGrid, Calendar as CalendarIcon } from 'lucide-react';
 import { updateBoard } from '../api/kanban';
 import WidgetsSidebar from './WidgetsSidebar';
+import CalendarView from './CalendarView';
 
 export default function KanbanBoard({ boardId, loadAllBoards, boards }) {
   const [board, setBoard] = useState(null);
+  const [viewMode, setViewMode] = useState('kanban');
   const [activeCard, setActiveCard] = useState(null);
   const [activeColumn, setActiveColumn] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -114,27 +116,48 @@ export default function KanbanBoard({ boardId, loadAllBoards, boards }) {
   }
 
   return (
-    <div className="kanban-container">
-      <div style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center' }}>
+    <div className="kanban-container" style={{ display: 'flex', flexDirection: 'column' }}>
+      <div style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <h2 style={{ fontSize: '1.5rem', fontWeight: 600 }}>{board.title}</h2>
-      </div>
-      <DndContext sensors={sensors} collisionDetection={closestCorners} onDragStart={handleDragStart} onDragOver={handleDragOver} onDragEnd={handleDragEnd}>
-        <div className="kanban-board">
-          <SortableContext items={board.columns.map(c => c._id)} strategy={horizontalListSortingStrategy}>
-            {board.columns.map((col) => (
-              <KanbanColumn key={col._id} column={col} boardId={board._id} reloadBoard={loadAllBoards} />
-            ))}
-          </SortableContext>
-          <WidgetsSidebar />
+        <div style={{ display: 'flex', gap: '0.5rem', background: 'rgba(255,255,255,0.05)', padding: '0.25rem', borderRadius: '8px' }}>
+          <button 
+            onClick={() => setViewMode('kanban')}
+            style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.4rem 0.8rem', borderRadius: '6px', border: 'none', cursor: 'pointer', background: viewMode === 'kanban' ? 'rgba(255,255,255,0.1)' : 'transparent', color: viewMode === 'kanban' ? 'white' : 'var(--text-muted)' }}
+          >
+            <LayoutGrid size={16} /> <span className="hide-mobile">Board</span>
+          </button>
+          <button 
+            onClick={() => setViewMode('calendar')}
+            style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.4rem 0.8rem', borderRadius: '6px', border: 'none', cursor: 'pointer', background: viewMode === 'calendar' ? 'rgba(255,255,255,0.1)' : 'transparent', color: viewMode === 'calendar' ? 'white' : 'var(--text-muted)' }}
+          >
+            <CalendarIcon size={16} /> <span className="hide-mobile">Calendar</span>
+          </button>
         </div>
-        <DragOverlay>
-          {activeCard && (
-            <div className="glass-card kanban-card" style={{ transform: 'rotate(5deg)', borderLeft: activeCard.color ? `4px solid ${activeCard.color}` : '1px solid var(--panel-border)' }}>
-              <div className="card-title">{activeCard.title}</div>
-            </div>
-          )}
-        </DragOverlay>
-      </DndContext>
+      </div>
+      
+      {viewMode === 'kanban' ? (
+        <DndContext sensors={sensors} collisionDetection={closestCorners} onDragStart={handleDragStart} onDragOver={handleDragOver} onDragEnd={handleDragEnd}>
+          <div className="kanban-board">
+            <SortableContext items={board.columns.map(c => c._id)} strategy={horizontalListSortingStrategy}>
+              {board.columns.map((col) => (
+                <KanbanColumn key={col._id} column={col} boardId={board._id} reloadBoard={loadAllBoards} />
+              ))}
+            </SortableContext>
+            <WidgetsSidebar />
+          </div>
+          <DragOverlay>
+            {activeCard && (
+              <div className="glass-card kanban-card" style={{ transform: 'rotate(5deg)', borderLeft: activeCard.color ? `4px solid ${activeCard.color}` : '1px solid var(--panel-border)' }}>
+                <div className="card-title">{activeCard.title}</div>
+              </div>
+            )}
+          </DragOverlay>
+        </DndContext>
+      ) : (
+        <div style={{ flex: 1, minHeight: 0, overflow: 'hidden' }}>
+          <CalendarView board={board} reloadBoard={loadAllBoards} />
+        </div>
+      )}
     </div>
   );
 }

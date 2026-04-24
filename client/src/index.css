@@ -336,7 +336,38 @@ body {
   .dashboard-main {
     height: calc(100vh - 60px) !important;
   }
+
+  /* FullCalendar Mobile Overrides */
+  .calendar-view-container {
+    padding-bottom: 150px !important;
+  }
+  
+  .fc .fc-toolbar {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .fc .fc-toolbar-title {
+    font-size: 1.1rem !important;
+  }
+
+  .fc .fc-button {
+    padding: 0.3rem 0.6rem !important;
+    font-size: 0.8rem !important;
+  }
+
+  .fc .fc-col-header-cell-cushion {
+    font-size: 0.7rem !important;
+    padding: 2px !important;
+    white-space: normal !important;
+    word-break: break-all;
+  }
+
+  .fc-timegrid-slot-label-cushion {
+    font-size: 0.7rem !important;
+  }
 }
+
 
 
 .priority-badge {
@@ -618,5 +649,68 @@ body {
     flex: 1;
     width: 100%;
   }
+}
+
+/* =========================================
+   FullCalendar Overrides (Dark Theme)
+   ========================================= */
+.calendar-view-container {
+  /* Fix height in flex container */
+  min-height: 500px;
+}
+
+.fc-theme-standard {
+  --fc-page-bg-color: transparent;
+  --fc-neutral-bg-color: rgba(255,255,255,0.05);
+  --fc-neutral-text-color: var(--text-muted);
+  --fc-border-color: rgba(255,255,255,0.1);
+  --fc-button-text-color: var(--text-main);
+  --fc-button-bg-color: rgba(255,255,255,0.05);
+  --fc-button-border-color: rgba(255,255,255,0.1);
+  --fc-button-hover-bg-color: rgba(255,255,255,0.15);
+  --fc-button-hover-border-color: rgba(255,255,255,0.2);
+  --fc-button-active-bg-color: var(--accent-indigo);
+  --fc-button-active-border-color: var(--accent-indigo);
+  --fc-event-bg-color: var(--accent-indigo);
+  --fc-event-border-color: transparent;
+  --fc-event-text-color: #fff;
+  --fc-today-bg-color: rgba(99, 102, 241, 0.1);
+  --fc-now-indicator-color: var(--accent-rose);
+}
+
+.fc-toolbar-title {
+  font-size: 1.25rem !important;
+  font-weight: 600;
+}
+
+.fc-button {
+  text-transform: capitalize !important;
+  font-weight: 500 !important;
+  border-radius: 6px !important;
+}
+
+.fc-event {
+  border-radius: 4px;
+  padding: 2px 4px;
+  cursor: pointer;
+  transition: opacity 0.2s;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.fc-event:hover {
+  opacity: 0.9;
+}
+
+.fc-timegrid-slot {
+  height: 40px !important;
+}
+
+.fc-col-header-cell {
+  padding: 0.5rem 0;
+  background: rgba(0,0,0,0.2);
+}
+
+.fc-daygrid-day-number {
+  color: var(--text-main);
 }
 
