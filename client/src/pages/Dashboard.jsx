@@ -7,6 +7,9 @@ import CreateBoardModal from '../components/CreateBoardModal';
 import { Plus, LogOut, Layout, Folder, Send, Trash2, ChevronDown } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import NotificationToast from '../components/NotificationToast';
+import UndoToast from '../components/UndoToast';
+import TrashModal from '../components/TrashModal';
+import { UndoContext } from '../context/UndoContext';
 
 export default function Dashboard() {
   const { user, handleLogout } = useContext(AuthContext);
@@ -14,11 +17,13 @@ export default function Dashboard() {
   const [activeBoardId, setActiveBoardId] = useState(null);
   const [isCreatingBoard, setIsCreatingBoard] = useState(false);
   const [isBoardModalOpen, setIsBoardModalOpen] = useState(false);
+  const [isTrashModalOpen, setIsTrashModalOpen] = useState(false);
   const navigate = useNavigate();
+  const { notifyDeleted, triggerReload } = useContext(UndoContext);
 
   useEffect(() => {
     loadBoards();
-  }, []);
+  }, [triggerReload]);
 
   const loadBoards = async () => {
     try {
@@ -50,6 +55,7 @@ export default function Dashboard() {
 
   const handleDeleteBoard = async (boardId, e) => {
     e.stopPropagation();
+    const boardToDelete = boards.find(b => b._id === boardId);
     if (window.confirm('Are you sure you want to delete this board?')) {
       try {
         await deleteBoard(boardId);
@@ -58,6 +64,7 @@ export default function Dashboard() {
         if (activeBoardId === boardId) {
           setActiveBoardId(newBoards.length > 0 ? newBoards[0]._id : null);
         }
+        notifyDeleted('board', boardToDelete?.title || 'Board');
       } catch (err) {
         console.error(err);
       }
@@ -131,6 +138,17 @@ export default function Dashboard() {
             <button onClick={() => setIsCreatingBoard(true)} style={{ background: 'none', border: 'none', color: 'var(--text-main)', cursor: 'pointer' }} title="Create new board"><Plus size={16} /></button>
           </div>
 
+          <div style={{ marginTop: '2rem' }}>
+            <button 
+               onClick={() => setIsTrashModalOpen(true)}
+               style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.75rem', background: 'rgba(244, 63, 94, 0.05)', border: '1px dashed rgba(244, 63, 94, 0.3)', borderRadius: '8px', color: 'var(--text-muted)', cursor: 'pointer', transition: 'all 0.2s' }}
+               onMouseEnter={e => { e.currentTarget.style.background = 'rgba(244, 63, 94, 0.1)'; e.currentTarget.style.color = 'var(--accent-rose)'; }}
+               onMouseLeave={e => { e.currentTarget.style.background = 'rgba(244, 63, 94, 0.05)'; e.currentTarget.style.color = 'var(--text-muted)'; }}
+            >
+               <Trash2 size={16} />
+               <span style={{ fontWeight: 600 }}>Recycle Bin</span>
+            </button>
+          </div>
         </div>
 
         <div className="sidebar-logout" style={{ padding: '1rem', borderTop: '1px solid var(--panel-border)', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
@@ -163,6 +181,13 @@ export default function Dashboard() {
       </main>
 
       <NotificationToast boards={boards} />
+      <UndoToast />
+
+      <TrashModal 
+        isOpen={isTrashModalOpen}
+        onClose={() => setIsTrashModalOpen(false)}
+        onRestored={() => loadBoards()}
+      />
 
       <BoardSelectorModal 
         isOpen={isBoardModalOpen}

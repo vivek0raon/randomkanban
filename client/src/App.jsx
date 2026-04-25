@@ -5,6 +5,7 @@ import LandingPage from './pages/LandingPage';
 import AuthPage from './pages/AuthPage';
 import Dashboard from './pages/Dashboard';
 import { Loader2 } from 'lucide-react';
+import { UndoProvider } from './context/UndoContext';
 
 function ProtectedRoute({ children }) {
   const { user, isLoading } = useContext(AuthContext);
@@ -46,9 +47,11 @@ function AppContent() {
 function App() {
   return (
     <AuthProvider>
-      <BrowserRouter>
-        <AppContent />
-      </BrowserRouter>
+      <UndoProvider>
+        <BrowserRouter>
+          <AppContent />
+        </BrowserRouter>
+      </UndoProvider>
     </AuthProvider>
   );
 }

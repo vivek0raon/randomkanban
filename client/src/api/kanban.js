@@ -78,3 +78,24 @@ export const deleteCard = async (boardId, columnId, cardId) => {
   const response = await api.delete(`/boards/${boardId}/columns/${columnId}/cards/${cardId}`);
   return response.data;
 };
+
+// --- Trash APIs ---
+export const fetchTrash = async () => {
+  const response = await api.get('/trash');
+  return response.data;
+};
+
+export const restoreTrash = async (trashId) => {
+  const response = await api.post(`/trash/${trashId}/restore`);
+  return response.data;
+};
+
+export const deleteTrashItem = async (trashId) => {
+  const response = await api.delete(`/trash/${trashId}`);
+  return response.data;
+};
+
+export const emptyTrash = async () => {
+  const response = await api.delete('/trash');
+  return response.data;
+};

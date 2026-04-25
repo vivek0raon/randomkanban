@@ -4,9 +4,12 @@ import { CSS } from '@dnd-kit/utilities';
 import { Trash2, Edit2, Calendar } from 'lucide-react';
 import { deleteCard, updateCard } from '../api/kanban';
 import TaskModal from './TaskModal';
+import { useContext } from 'react';
+import { UndoContext } from '../context/UndoContext';
 
 export default function KanbanCardItem({ card, columnId, boardId, reloadBoard }) {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const { notifyDeleted } = useContext(UndoContext);
 
   const {
     setNodeRef,
@@ -35,6 +38,7 @@ export default function KanbanCardItem({ card, columnId, boardId, reloadBoard })
     try {
       await deleteCard(boardId, columnId, card._id);
       reloadBoard();
+      notifyDeleted('card', card.title);
     } catch (err) {
       console.error("Failed to delete card", err);
     }

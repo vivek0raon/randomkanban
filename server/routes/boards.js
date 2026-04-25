@@ -1,5 +1,6 @@
 import express from 'express';
 import Board from '../models/Board.js';
+import Trash from '../models/Trash.js';
 import { protect } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
@@ -55,8 +56,17 @@ router.put('/:id', async (req, res) => {
 // Delete a board
 router.delete('/:id', async (req, res) => {
   try {
-    const board = await Board.findOneAndDelete({ _id: req.params.id, user: req.user._id });
+    const board = await Board.findOne({ _id: req.params.id, user: req.user._id });
     if (!board) return res.status(404).json({ message: 'Board not found' });
+    
+    // Save to Trash
+    await Trash.create({
+      user: req.user._id,
+      itemType: 'board',
+      data: board.toObject()
+    });
+
+    await Board.findByIdAndDelete(board._id);
     res.json({ message: 'Board deleted' });
   } catch (error) {
     res.status(400).json({ message: error.message });
@@ -136,6 +146,20 @@ router.delete('/:id/columns/:colId/cards/:cardId', async (req, res) => {
     if (!board) return res.status(404).json({ message: 'Board not found' });
 
     const column = board.columns.id(req.params.colId);
+    if (!column) return res.status(404).json({ message: 'Column not found' });
+    
+    const card = column.cards.id(req.params.cardId);
+    if (!card) return res.status(404).json({ message: 'Card not found' });
+
+    // Save to Trash
+    await Trash.create({
+      user: req.user._id,
+      itemType: 'card',
+      boardId: board._id,
+      columnId: column._id,
+      data: card.toObject()
+    });
+
     column.cards = column.cards.filter(c => c._id.toString() !== req.params.cardId);
     await board.save();
     res.json(board);

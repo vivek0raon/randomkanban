@@ -4,6 +4,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import boardRoutes from './routes/boards.js';
 import authRoutes from './routes/auth.js';
+import trashRoutes from './routes/trash.js';
 import { initTelegramBot } from './services/telegramBot.js';
 import { initCronJobs } from './services/cronJobs.js';
 import path from 'path';
@@ -30,6 +31,7 @@ mongoose.connect(process.env.MONGODB_URI)
 
 app.use('/api/auth', authRoutes);
 app.use('/api/boards', boardRoutes);
+app.use('/api/trash', trashRoutes);
 
 if (process.env.NODE_ENV === "production") {
   // MUST be positioned after all API routes
